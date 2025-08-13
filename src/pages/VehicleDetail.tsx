@@ -1,8 +1,14 @@
 import { Button, Card, Spin, Tag } from "antd";
 import { useNavigate, useParams } from "react-router";
-import { useVehicleById } from "../query-hooks/useVehicles";
+import {
+  useVehicleById,
+  useVehicleLocationByVehicleId,
+} from "../query-hooks/useVehicles";
 import dayjs from "dayjs";
-import { Map } from "@vis.gl/react-google-maps";
+import { Map, Marker } from "@vis.gl/react-google-maps";
+import { useVehicleLocationStream } from "../query-hooks/useLocations";
+import { useEffect, useState } from "react";
+import type { VehicleLocation } from "../types/locations";
 
 export function Component() {
   const navigate = useNavigate();
@@ -12,6 +18,45 @@ export function Component() {
     id: id ?? "",
     enabled: !!id,
   });
+
+  const { lastLocation, isConnected } = useVehicleLocationStream(id);
+  const [center, setCenter] = useState<
+    { lat: number; lng: number } | undefined
+  >(undefined);
+
+  const { data: locationsData } = useVehicleLocationByVehicleId(id);
+
+  const [track, setTrack] = useState<VehicleLocation[]>([]);
+
+  useEffect(() => {
+    if (locationsData?.results && locationsData.results.length > 0) {
+      setTrack(locationsData?.results);
+      setCenter({
+        lat: parseFloat(
+          locationsData.results[locationsData.results.length - 1].latitude
+        ),
+        lng: parseFloat(
+          locationsData.results[locationsData.results.length - 1].longitude
+        ),
+      });
+    }
+  }, [locationsData]);
+
+  useEffect(() => {
+    if (lastLocation) {
+      setTrack((prev) => {
+        if (prev.length > 0) {
+          const last = prev[prev.length - 1];
+          if (last.id === lastLocation.id) return prev;
+        }
+        return [...prev, lastLocation];
+      });
+      setCenter({
+        lat: parseFloat(lastLocation.latitude),
+        lng: parseFloat(lastLocation.longitude),
+      });
+    }
+  }, [lastLocation]);
 
   if (!id) {
     return (
@@ -87,13 +132,53 @@ export function Component() {
         </Card>
       )}
 
+      <div className="mt-3 flex items-center gap-2">
+        <Tag color={isConnected ? "green" : "red"}>
+          {isConnected ? "Streaming" : "Disconnected"}
+        </Tag>
+        {lastLocation ? (
+          <span className="text-sm text-gray-600">
+            Speed: <b>{lastLocation.speed} km/h</b> • Updated:{" "}
+            {dayjs(lastLocation.timestamp).format("DD.MM.YYYY HH:mm:ss")}
+          </span>
+        ) : (
+          <span className="text-sm text-gray-600">Waiting for location…</span>
+        )}
+      </div>
+
       <Map
         style={{ width: "100%", height: "700px", marginTop: 10 }}
-        defaultCenter={{ lat: 22.54992, lng: 0 }}
-        defaultZoom={3}
+        defaultCenter={{ lat: 39.925533, lng: 32.866287 }}
+        center={center}
+        defaultZoom={6}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
-      />
+      >
+        {track.length > 1 &&
+          track.slice(0, -1).map((p) => (
+            <>
+              <Marker
+                key={p.id}
+                position={{
+                  lat: parseFloat(p.latitude),
+                  lng: parseFloat(p.longitude),
+                }}
+                title={dayjs(p.timestamp).format("DD.MM.YYYY HH:mm:ss")}
+              />
+              <div>{p.latitude}</div>
+            </>
+          ))}
+
+        {track.length > 0 && (
+          <Marker
+            position={{
+              lat: parseFloat(track[track.length - 1].latitude),
+              lng: parseFloat(track[track.length - 1].longitude),
+            }}
+            title={`Vehicle ${id}`}
+          />
+        )}
+      </Map>
     </div>
   );
 }

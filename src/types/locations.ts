@@ -1,8 +1,8 @@
 export interface VehicleLocation {
   id: string;
   vehicleId: string;
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
   speed: number;
   timestamp: string;
 }

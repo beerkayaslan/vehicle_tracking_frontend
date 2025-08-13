@@ -35,17 +35,13 @@ export const useVehicleById = ({
   });
 };
 
-export const useVehicleLocationByVehicleId = ({
-  vehicleId,
-  enabled = true,
-}: {
-  vehicleId: string;
-  enabled?: boolean;
-}) => {
+export const useVehicleLocationByVehicleId = (
+  vehicleId: string | undefined
+) => {
   return useQuery({
-    queryKey: ["vehicles", vehicleId],
+    queryKey: ["vehicle-locations", vehicleId],
     queryFn: () => getLocationsByVehicleId(vehicleId),
-    enabled: enabled,
+    enabled: !!vehicleId,
   });
 };
 

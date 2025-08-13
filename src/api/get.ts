@@ -32,7 +32,7 @@ export async function getVehicleById(id: string): Promise<VehicleResponse> {
 }
 
 export async function getLocationsByVehicleId(
-  id: string
+  id: string | undefined
 ): Promise<VehicleLocationResponse> {
   const response = await fetch(`${API_URL}/vehicles/${id}/locations`);
 
