@@ -4,6 +4,7 @@ import type { ColumnsType } from "antd/es/table";
 import { useCreateVehicle, useVehicles } from "../query-hooks/useVehicles";
 import type { Vehicle, VehicleCreate } from "../types/vehicle";
 import { useNavigate } from "react-router";
+import dayjs from "dayjs";
 
 export function Component() {
   const navigate = useNavigate();
@@ -56,6 +57,9 @@ export function Component() {
         title: "Created",
         dataIndex: "createdAt",
         key: "createdAt",
+        render: (text: string) => {
+          return <span>{dayjs(text).format("DD.MM.YYYY HH:mm")}</span>;
+        },
       },
     ],
     [navigate]

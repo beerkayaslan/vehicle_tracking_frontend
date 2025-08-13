@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { VehicleCreate, VehicleViewQuery } from "../types/vehicle";
-import { getLocationsByVehicleId, getVehicles } from "../api/get";
+import {
+  getLocationsByVehicleId,
+  getVehicleById,
+  getVehicles,
+} from "../api/get";
 import { postVehicle } from "../api/post";
 
 export const useVehicles = ({
@@ -13,6 +17,20 @@ export const useVehicles = ({
   return useQuery({
     queryKey: ["vehicles", filters],
     queryFn: () => getVehicles(filters),
+    enabled: enabled,
+  });
+};
+
+export const useVehicleById = ({
+  id,
+  enabled = true,
+}: {
+  id: string;
+  enabled?: boolean;
+}) => {
+  return useQuery({
+    queryKey: ["vehicles", id],
+    queryFn: () => getVehicleById(id),
     enabled: enabled,
   });
 };

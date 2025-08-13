@@ -12,11 +12,15 @@ export interface VehicleCreate {
   isActive: boolean;
 }
 
-export interface VehicleResponse {
+export interface VehiclePagedResponse {
   results: Vehicle[];
   total: number;
   page: number;
   limit: number;
+}
+
+export interface VehicleResponse {
+  result: Vehicle;
 }
 
 export interface VehicleViewQuery {
