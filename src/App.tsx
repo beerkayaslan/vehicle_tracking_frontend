@@ -18,8 +18,12 @@ function App() {
                 lazy: () => import("./pages/Vehicles"),
               },
               {
-                path: "/vehicle-detail/:id",
-                lazy: () => import("./pages/VehicleDetailWebsocket"),
+                path: "/vehicle-detail-websocket/:id",
+                lazy: () => import("./pages/VehicleDetail_Websocket"),
+              },
+              {
+                path: "/vehicle-detail-sse/:id",
+                lazy: () => import("./pages/VehicleDetail_Sse"),
               },
             ])}
           />

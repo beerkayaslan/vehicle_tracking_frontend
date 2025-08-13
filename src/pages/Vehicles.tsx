@@ -1,14 +1,22 @@
 import { useMemo, useState } from "react";
-import { Button, Form, Input, Modal, Switch, Table, Tag, message } from "antd";
+import {
+  Button,
+  Flex,
+  Form,
+  Input,
+  Modal,
+  Switch,
+  Table,
+  Tag,
+  message,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useCreateVehicle, useVehicles } from "../query-hooks/useVehicles";
 import type { Vehicle, VehicleCreate } from "../types/vehicle";
-import { useNavigate } from "react-router";
+import { Link } from "react-router";
 import dayjs from "dayjs";
 
 export function Component() {
-  const navigate = useNavigate();
-
   // pagination state
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
@@ -29,14 +37,7 @@ export function Component() {
         title: "Plate Number",
         dataIndex: "plateNumber",
         key: "plateNumber",
-        render: (text: string, record) => (
-          <Button
-            type="link"
-            onClick={() => navigate(`/vehicle-detail/${record.id}`)}
-          >
-            {text}
-          </Button>
-        ),
+        render: (text: string) => <>{text}</>,
       },
       {
         title: "Driver",
@@ -61,8 +62,23 @@ export function Component() {
           return <span>{dayjs(text).format("DD.MM.YYYY HH:mm")}</span>;
         },
       },
+      {
+        title: "Plate Number (Websocket)",
+        dataIndex: "id",
+        key: "id",
+        render: (_: string, record) => (
+          <Flex gap={16}>
+            <Link to={`/vehicle-detail-websocket/${record.id}`}>
+              <Button type="primary">Websocket Detail</Button>
+            </Link>
+            <Link to={`/vehicle-detail-sse/${record.id}`}>
+              <Button type="primary">SSE Detail</Button>
+            </Link>
+          </Flex>
+        ),
+      },
     ],
-    [navigate]
+    []
   );
 
   const handleCreate = async () => {
