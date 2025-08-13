@@ -20,9 +20,6 @@ export function Component() {
   });
 
   const { lastLocation, isConnected } = useVehicleLocationStream(id);
-  const [center, setCenter] = useState<
-    { lat: number; lng: number } | undefined
-  >(undefined);
 
   const { data: locationsData } = useVehicleLocationByVehicleId(id);
 
@@ -31,14 +28,6 @@ export function Component() {
   useEffect(() => {
     if (locationsData?.results && locationsData.results.length > 0) {
       setTrack(locationsData?.results);
-      setCenter({
-        lat: parseFloat(
-          locationsData.results[locationsData.results.length - 1].latitude
-        ),
-        lng: parseFloat(
-          locationsData.results[locationsData.results.length - 1].longitude
-        ),
-      });
     }
   }, [locationsData]);
 
@@ -50,10 +39,6 @@ export function Component() {
           if (last.id === lastLocation.id) return prev;
         }
         return [...prev, lastLocation];
-      });
-      setCenter({
-        lat: parseFloat(lastLocation.latitude),
-        lng: parseFloat(lastLocation.longitude),
       });
     }
   }, [lastLocation]);
@@ -149,7 +134,6 @@ export function Component() {
       <Map
         style={{ width: "100%", height: "700px", marginTop: 10 }}
         defaultCenter={{ lat: 39.925533, lng: 32.866287 }}
-        center={center}
         defaultZoom={6}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
