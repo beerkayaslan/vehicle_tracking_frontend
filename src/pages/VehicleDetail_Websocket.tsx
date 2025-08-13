@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { WS_URL } from "../../config";
 import type { VehicleLocation } from "../types/locations";
+import Polyline from "../components/Polyline";
 
 export function Component() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export function Component() {
 
   useEffect(() => {
     if (locationsData?.results && locationsData.results.length > 0) {
-      setTrack(locationsData?.results);
+      setTrack([...locationsData.results].reverse());
     }
   }, [locationsData]);
 
@@ -171,7 +172,7 @@ export function Component() {
         gestureHandling={"greedy"}
         disableDefaultUI={true}
       >
-        {track.length > 1 &&
+        {/* {track.length > 1 &&
           track.slice(0, -1).map((p) => (
             <Marker
               key={p.id}
@@ -181,16 +182,24 @@ export function Component() {
               }}
               title={dayjs(p.timestamp).format("DD.MM.YYYY HH:mm:ss")}
             />
-          ))}
+          ))} */}
 
         {track.length > 0 && (
-          <Marker
-            position={{
-              lat: parseFloat(track[track.length - 1].latitude),
-              lng: parseFloat(track[track.length - 1].longitude),
-            }}
-            title={`Vehicle ${id}`}
-          />
+          <>
+            <Marker
+              position={{
+                lat: parseFloat(track[track.length - 1].latitude),
+                lng: parseFloat(track[track.length - 1].longitude),
+              }}
+              title={`Vehicle ${id}`}
+            />
+            <Polyline
+              path={track?.map((p) => ({
+                lat: parseFloat(p.latitude),
+                lng: parseFloat(p.longitude),
+              }))}
+            />
+          </>
         )}
       </GoogleMap>
     </div>

@@ -9,6 +9,7 @@ import { Map, Marker } from "@vis.gl/react-google-maps";
 import { useVehicleLocationStream } from "../query-hooks/useLocations";
 import { useEffect, useState } from "react";
 import type { VehicleLocation } from "../types/locations";
+import Polyline from "../components/Polyline";
 
 export function Component() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export function Component() {
 
   useEffect(() => {
     if (locationsData?.results && locationsData.results.length > 0) {
-      setTrack(locationsData?.results);
+      setTrack([...locationsData.results].reverse());
     }
   }, [locationsData]);
 
@@ -130,7 +131,7 @@ export function Component() {
         gestureHandling={"greedy"}
         disableDefaultUI={true}
       >
-        {track.length > 1 &&
+        {/* {track.length > 1 &&
           track.slice(0, -1).map((p) => (
             <>
               <Marker
@@ -143,7 +144,7 @@ export function Component() {
               />
               <div>{p.latitude}</div>
             </>
-          ))}
+          ))} */}
 
         {track.length > 0 && (
           <Marker
@@ -154,6 +155,13 @@ export function Component() {
             title={`Vehicle ${id}`}
           />
         )}
+
+        <Polyline
+          path={track.map((p) => ({
+            lat: parseFloat(p.latitude),
+            lng: parseFloat(p.longitude),
+          }))}
+        />
       </Map>
     </div>
   );
