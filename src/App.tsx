@@ -19,7 +19,7 @@ function App() {
               },
               {
                 path: "/vehicle-detail/:id",
-                lazy: () => import("./pages/VehicleDetail"),
+                lazy: () => import("./pages/VehicleDetailWebsocket"),
               },
             ])}
           />
