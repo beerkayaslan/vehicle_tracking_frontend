@@ -5,11 +5,17 @@ import {
   useVehicleLocationByVehicleId,
 } from "../query-hooks/useVehicles";
 import dayjs from "dayjs";
-import { Map, Marker } from "@vis.gl/react-google-maps";
+import {
+  Map,
+  AdvancedMarker,
+  Pin,
+  InfoWindow,
+} from "@vis.gl/react-google-maps";
 import { useVehicleLocationStream } from "../query-hooks/useLocations";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { VehicleLocation } from "../types/locations";
 import Polyline from "../components/Polyline";
+import { GOOGLE_MAPS_MAP_ID } from "../../config";
 
 export function Component() {
   const navigate = useNavigate();
@@ -25,6 +31,8 @@ export function Component() {
   const { data: locationsData } = useVehicleLocationByVehicleId(id);
 
   const [track, setTrack] = useState<VehicleLocation[]>([]);
+  const [selectedLocation, setSelectedLocation] =
+    useState<VehicleLocation | null>(null);
 
   useEffect(() => {
     if (locationsData?.results && locationsData.results.length > 0) {
@@ -43,6 +51,10 @@ export function Component() {
       });
     }
   }, [lastLocation]);
+
+  const locationLastMemo = useMemo(() => {
+    return track[track.length - 1];
+  }, [track]);
 
   if (!id) {
     return (
@@ -130,30 +142,82 @@ export function Component() {
         defaultZoom={6}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
+        mapId={GOOGLE_MAPS_MAP_ID}
       >
-        {track.length > 1 &&
-          track.slice(0, -1).map((p) => (
-            <>
-              <Marker
+        {track.length > 0 &&
+          track.map((p, idx) => {
+            const isLast = idx === track.length - 1;
+            return (
+              <AdvancedMarker
                 key={p.id}
                 position={{
                   lat: parseFloat(p.latitude),
                   lng: parseFloat(p.longitude),
                 }}
                 title={dayjs(p.timestamp).format("DD.MM.YYYY HH:mm:ss")}
-              />
-              <div>{p.latitude}</div>
-            </>
-          ))}
+                onClick={() => setSelectedLocation(p)}
+              >
+                {!isLast && (
+                  <div
+                    style={{
+                      width: 16,
+                      height: 16,
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      background: "#1dbe80",
+                      border: "2px solid #0e6443",
+                      borderRadius: "50%",
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  />
+                )}
+              </AdvancedMarker>
+            );
+          })}
 
-        {track.length > 0 && (
-          <Marker
+        {locationLastMemo ? (
+          <AdvancedMarker
+            key={locationLastMemo.id}
             position={{
-              lat: parseFloat(track[track.length - 1].latitude),
-              lng: parseFloat(track[track.length - 1].longitude),
+              lat: parseFloat(locationLastMemo.latitude),
+              lng: parseFloat(locationLastMemo.longitude),
             }}
-            title={`Vehicle ${id}`}
-          />
+            title={dayjs(locationLastMemo.timestamp).format(
+              "DD.MM.YYYY HH:mm:ss"
+            )}
+            onClick={() => setSelectedLocation(locationLastMemo)}
+          >
+            <Pin />
+          </AdvancedMarker>
+        ) : null}
+
+        {selectedLocation && (
+          <InfoWindow
+            position={{
+              lat: parseFloat(selectedLocation.latitude),
+              lng: parseFloat(selectedLocation.longitude),
+            }}
+            onCloseClick={() => setSelectedLocation(null)}
+          >
+            <div style={{ minWidth: 140 }}>
+              <div className="text-sm font-medium mb-1">Konum Bilgisi</div>
+              <div className="text-xs flex justify-between">
+                <span>Hız:</span>
+                <span className="font-semibold">
+                  {selectedLocation.speed?.toFixed(1)} km/h
+                </span>
+              </div>
+              <div className="text-xs flex justify-between">
+                <span>Tarih:</span>
+                <span className="font-semibold">
+                  {dayjs(selectedLocation.timestamp).format(
+                    "DD.MM.YYYY HH:mm:ss"
+                  )}
+                </span>
+              </div>
+            </div>
+          </InfoWindow>
         )}
 
         <Polyline
