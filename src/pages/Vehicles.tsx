@@ -87,6 +87,7 @@ export function Component() {
             <Button
               color="orange"
               variant="solid"
+              disabled={!record.isActive}
               onClick={() => {
                 setSelectedVehicle(record);
                 locationForm.setFieldsValue({
