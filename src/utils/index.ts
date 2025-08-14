@@ -13,7 +13,6 @@ export const buildQueryParams = <T extends Record<string, any>>(
         typeof value === "object" &&
         !Array.isArray(value)
       ) {
-        // Filters objesindeki parametreleri üst seviyeye çıkar
         Object.entries(value).forEach(([filterKey, filterValue]) => {
           if (
             filterValue !== undefined &&

@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { API_URL } from "../../config";
-import type { VehicleLocation } from "../types/locations";
+import type {
+  VehicleLocation,
+  VehicleLocationCreate,
+} from "../types/locations";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postLocation } from "../api/post";
 
 export const useVehicleLocationStream = (vehicleId?: string) => {
   const [lastLocation, setLastLocation] = useState<VehicleLocation | undefined>(
@@ -37,7 +42,6 @@ export const useVehicleLocationStream = (vehicleId?: string) => {
 
     es.onmessage = (evt) => {
       const data = JSON.parse(evt.data) as VehicleLocation;
-      // Basic validation
       if (
         typeof data?.latitude === "number" &&
         typeof data?.longitude === "number"
@@ -58,4 +62,18 @@ export const useVehicleLocationStream = (vehicleId?: string) => {
   }, [url]);
 
   return { lastLocation, isConnected, error } as const;
+};
+
+export const useCreateLocation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ data }: { data: VehicleLocationCreate }) =>
+      postLocation(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["locations"],
+      });
+    },
+  });
 };

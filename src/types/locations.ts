@@ -10,3 +10,10 @@ export interface VehicleLocation {
 export interface VehicleLocationResponse {
   results: VehicleLocation[];
 }
+
+export interface VehicleLocationCreate {
+  vehicleId: string;
+  latitude: string;
+  longitude: string;
+  speed: number;
+}

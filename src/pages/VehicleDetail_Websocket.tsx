@@ -32,14 +32,12 @@ export function Component() {
     }
   }, [locationsData]);
 
-  // Helper to merge incoming locations (single or array) into track in a sorted, de-duplicated way
   const mergeLocations = (
     prev: VehicleLocation[],
     incoming: VehicleLocation | VehicleLocation[]
   ): VehicleLocation[] => {
     const list = Array.isArray(incoming) ? incoming : [incoming];
     const byId = new Map<string, VehicleLocation>();
-    // Put previous first so newer incoming with same id overwrite
     prev.forEach((p) => byId.set(p.id, p));
     list.forEach((p) => byId.set(p.id, p));
     return Array.from(byId.values()).sort(
@@ -48,22 +46,18 @@ export function Component() {
     );
   };
 
-  // Websocket connection & live updates
   useEffect(() => {
     if (!id) return;
 
-    // Connect with query param to auto join room
     const socket = io(WS_URL, {
       query: { vehicleId: id },
-      transports: ["websocket"], // force websocket for lower latency
+      transports: ["websocket"],
     });
     socketRef.current = socket;
 
-    // Fallback: manual join if server expects explicit event
     socket.emit("join-vehicle", { vehicleId: id });
 
     socket.on("connect", () => {
-      // console.log('Socket connected', socket.id);
       setIsConnected(true);
     });
 
@@ -75,7 +69,6 @@ export function Component() {
     );
 
     socket.on("disconnect", () => {
-      // console.log('Socket disconnected');
       setIsConnected(false);
     });
 
@@ -172,7 +165,7 @@ export function Component() {
         gestureHandling={"greedy"}
         disableDefaultUI={true}
       >
-        {/* {track.length > 1 &&
+        {track.length > 1 &&
           track.slice(0, -1).map((p) => (
             <Marker
               key={p.id}
@@ -182,7 +175,7 @@ export function Component() {
               }}
               title={dayjs(p.timestamp).format("DD.MM.YYYY HH:mm:ss")}
             />
-          ))} */}
+          ))}
 
         {track.length > 0 && (
           <>

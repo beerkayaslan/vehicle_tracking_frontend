@@ -131,7 +131,7 @@ export function Component() {
         gestureHandling={"greedy"}
         disableDefaultUI={true}
       >
-        {/* {track.length > 1 &&
+        {track.length > 1 &&
           track.slice(0, -1).map((p) => (
             <>
               <Marker
@@ -144,7 +144,7 @@ export function Component() {
               />
               <div>{p.latitude}</div>
             </>
-          ))} */}
+          ))}
 
         {track.length > 0 && (
           <Marker
